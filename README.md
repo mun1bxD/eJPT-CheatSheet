@@ -1,4 +1,4 @@
-# eJPT Cheet Sheet
+# eJPT Cheat Sheet
 
 This repo has the cheatsheet that I made during my eJPT exam prep...
 
