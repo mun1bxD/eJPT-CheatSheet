@@ -181,14 +181,14 @@ sudo netdicover -i eth0 -r 192.168.3.0/24
 - `--osscan-guess`: OS Version probability.
 
 Example:
-```bash
+```shell
 nmap -sS -p 1-100,443 192.168.1.13,14
 ```
 
 Tip: Use `--reason` to show the explanation of why a port is marked open or closed  
 Tip: Use `--open` to show only open, open filtered, and unfiltered ports.
 
-```console
+```shell
 nmap -T4 -sS -sV --version-intensity 8 <ip-address>
 ```
 
