@@ -1,7 +1,7 @@
 ## eJPT Cheat Sheet
 
 
-#### Find IP address of a website:
+## Find IP address of a website:
 
 ```shell
 host <url>
