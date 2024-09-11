@@ -1,4 +1,4 @@
-## eJPT Cheat Sheet
+# eJPT Cheat Sheet
 
 
 ## Find IP address of a website:
