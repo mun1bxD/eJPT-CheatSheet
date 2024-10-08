@@ -261,7 +261,8 @@ nmap -p 443 --script ssl-heartbleed <ip-address>
 nmap --script log4shell.nse --script-args log4shell.callback-server=172.17.42.1:1389 -p 8080 <ip-address>
 ```
 
-> Log4J Discovery script.
+> Log4J Discovery script
+
 #### TCP Commands:
 
 ```Shell
@@ -270,6 +271,14 @@ netstat -ano         /windows
 ```
 
 > Lists down all the current tcp connections.
+
+#### Ping Sweep:
+
+```shell
+ping -b -c 4 <broadcast IP address>
+fping -a -g <IP address>/24
+```
+> Ping Sweep: A technique to identify active hosts in a network range by sending ICMP Echo Requests.
 
 #### SMB Commands:
 
