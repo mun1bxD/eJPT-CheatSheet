@@ -2482,7 +2482,7 @@ migrate <pid>
 #### Pivoting:
 
 ```msfconsole
-run autoroute -s 10.0.16.0/20
+meterpreter> run autoroute -s 10.0.16.0/20
 ```
 
 > This command can be used to set route from one network to another network. First type `ifconfig` or `ipconfig` to check all the possible interfaces on the machine.
